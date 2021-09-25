@@ -1,12 +1,17 @@
-import 'package:flutter/material.dart';
+import 'package:book_sample/interfaces/view.dart';
 
-class BaseController {
-  State viewState;
+abstract class BaseController {
+  ViewState? viewState;
 
-  BaseController({required this.viewState});
+  void attach(ViewState viewState) {
+    this.viewState = viewState;
+  }
+
+  void detach(ViewState viewState) {
+    this.viewState = null;
+  }
 
   void notify() {
-    // ignore: invalid_use_of_protected_member
-    viewState.setState(() {});
+    viewState?.update();
   }
 }

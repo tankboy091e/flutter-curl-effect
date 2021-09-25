@@ -1,26 +1,38 @@
 import 'package:book_sample/book/page.dart';
 import 'package:book_sample/controller/book.dart';
+import 'package:book_sample/interfaces/view.dart';
 import 'package:flutter/material.dart';
 
 class BookLandscapeView extends StatefulWidget {
-  late final _BookLandscapeViewState _state;
-  late final BookController controller;
-
-  BookLandscapeView({Key? key}) : super(key: key) {
-    _state = _BookLandscapeViewState();
-    controller = BookController(viewState: _state);
-  }
+  const BookLandscapeView({Key? key}) : super(key: key);
 
   @override
   // ignore: no_logic_in_create_state
-  State<BookLandscapeView> createState() => _state;
+  State<BookLandscapeView> createState() => _BookLandscapeViewState();
 }
 
-class _BookLandscapeViewState extends State<BookLandscapeView> {
+class _BookLandscapeViewState extends ViewState<BookLandscapeView>
+    with SingleTickerProviderStateMixin {
+  late final BookController _controller = BookController();
+
+  @override
+  void initState() {
+    _controller.attachTickerProvider(this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.detach(this);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    _controller.attach(this);
+    _controller.attachContext(context);
     return FutureBuilder(
-      future: widget.controller.fetchData(),
+      future: _controller.loadData(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Stack(
@@ -28,20 +40,20 @@ class _BookLandscapeViewState extends State<BookLandscapeView> {
               Row(
                 children: [
                   Expanded(
-                    child: widget.controller.frontLeftPage != null
+                    child: _controller.backgroundLeftPage != null
                         ? BookPage(
                             paragraph:
-                                widget.controller.frontLeftPage!.paragraph,
-                            imageUrl: widget.controller.frontLeftPage!.image,
+                                _controller.backgroundLeftPage!.paragraph,
+                            imageUrl: _controller.backgroundLeftPage!.image,
                           )
                         : Container(),
                   ),
                   Expanded(
-                    child: widget.controller.frontRightPage != null
+                    child: _controller.backgroundRightPage != null
                         ? BookPage(
                             paragraph:
-                                widget.controller.frontRightPage!.paragraph,
-                            imageUrl: widget.controller.frontRightPage!.image,
+                                _controller.backgroundRightPage!.paragraph,
+                            imageUrl: _controller.backgroundRightPage!.image,
                           )
                         : Container(),
                   )
@@ -50,20 +62,92 @@ class _BookLandscapeViewState extends State<BookLandscapeView> {
               Row(
                 children: [
                   Expanded(
-                    child: widget.controller.behindLeftPage != null
-                        ? BookPage(
-                            paragraph:
-                                widget.controller.behindLeftPage!.paragraph,
-                            imageUrl: widget.controller.behindLeftPage!.image,
+                    child: _controller.behindRightPage != null
+                        ? ClipRect(
+                            clipper:
+                                BehindRightPageClipper(controller: _controller),
+                            child: BookPage(
+                              paragraph: _controller.behindRightPage!.paragraph,
+                              imageUrl: _controller.behindRightPage!.image,
+                            ),
                           )
                         : Container(),
                   ),
                   Expanded(
-                    child: widget.controller.behindRightPage != null
-                        ? BookPage(
-                            paragraph:
-                                widget.controller.behindRightPage!.paragraph,
-                            imageUrl: widget.controller.behindRightPage!.image,
+                    child: _controller.behindLeftPage != null
+                        ? ClipRect(
+                            clipper:
+                                BehindLeftPageClipper(controller: _controller),
+                            child: BookPage(
+                              paragraph: _controller.behindLeftPage!.paragraph,
+                              imageUrl: _controller.behindLeftPage!.image,
+                            ),
+                          )
+                        : Container(),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _controller.frontLeftPage != null
+                        ? Transform(
+                            transform: _controller.frontLeftPageMatrix4,
+                            origin: const Offset(1.0, 0.5),
+                            child: ClipRect(
+                              clipper:
+                                  FrontLeftPageClipper(controller: _controller),
+                              child: BookPage(
+                                paragraph: _controller.frontLeftPage!.paragraph,
+                                imageUrl: _controller.frontLeftPage!.image,
+                              ),
+                            ),
+                          )
+                        : Container(),
+                  ),
+                  Expanded(
+                    child: _controller.frontRightPage != null
+                        ? Transform(
+                            transform: _controller.frontRightPageMatrix4,
+                            origin: const Offset(0.0, 0.5),
+                            child: ClipRect(
+                              clipper: FrontRightPageClipper(
+                                  controller: _controller),
+                              child: BookPage(
+                                paragraph:
+                                    _controller.frontRightPage!.paragraph,
+                                imageUrl: _controller.frontRightPage!.image,
+                              ),
+                            ),
+                          )
+                        : Container(),
+                  )
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _controller.frontLeftPage != null
+                        ? GestureDetector(
+                            onHorizontalDragUpdate:
+                                _controller.onLeftPageDragUpdate,
+                            onHorizontalDragEnd: _controller.onLeftPageDragEnd,
+                            child: Container(
+                              color: Colors.red.withOpacity(0.0),
+                            ),
+                          )
+                        : Container(),
+                  ),
+                  const Spacer(flex: 1),
+                  Expanded(
+                    child: _controller.frontRightPage != null
+                        ? GestureDetector(
+                            onHorizontalDragUpdate:
+                                _controller.onRightPageDragUpdate,
+                            onHorizontalDragEnd: _controller.onRightPageDragEnd,
+                            child: Container(
+                              color: Colors.blue.withOpacity(0.0),
+                            ),
                           )
                         : Container(),
                   )
@@ -76,5 +160,90 @@ class _BookLandscapeViewState extends State<BookLandscapeView> {
         return const CircularProgressIndicator();
       },
     );
+  }
+}
+
+class BehindLeftPageClipper extends CustomClipper<Rect> {
+  final BookController controller;
+
+  BehindLeftPageClipper({required this.controller});
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTWH(
+      0.0,
+      0.0,
+      size.width * controller.rightPageWidthRatio +
+          controller.frontRightPageMatrix4.row0[3],
+      size.height,
+    );
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) {
+    return true;
+  }
+}
+
+class BehindRightPageClipper extends CustomClipper<Rect> {
+  final BookController controller;
+
+  BehindRightPageClipper({required this.controller});
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTWH(
+      0.0,
+      0.0,
+      size.width,
+      size.height,
+    );
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) {
+    return true;
+  }
+}
+
+class FrontLeftPageClipper extends CustomClipper<Rect> {
+  final BookController controller;
+
+  FrontLeftPageClipper({required this.controller});
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTWH(
+      0.0,
+      0.0,
+      size.width * controller.rightPageWidthRatio,
+      size.height,
+    );
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) {
+    return true;
+  }
+}
+
+class FrontRightPageClipper extends CustomClipper<Rect> {
+  final BookController controller;
+
+  FrontRightPageClipper({required this.controller});
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTWH(
+      size.width * (1 - controller.rightPageWidthRatio),
+      0.0,
+      size.width,
+      size.height,
+    );
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) {
+    return true;
   }
 }

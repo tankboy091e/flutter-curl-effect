@@ -73,34 +73,19 @@ class _BookLandscapeViewState extends ViewState<BookLandscapeView>
                           )
                         : Container(),
                   ),
-                  Expanded(
-                    child: _controller.behindLeftPage != null
-                        ? ClipRect(
-                            clipper:
-                                BehindLeftPageClipper(controller: _controller),
-                            child: BookPage(
-                              paragraph: _controller.behindLeftPage!.paragraph,
-                              imageUrl: _controller.behindLeftPage!.image,
-                            ),
-                          )
-                        : Container(),
-                  ),
+                  const Spacer(flex: 1)
                 ],
               ),
               Row(
                 children: [
                   Expanded(
                     child: _controller.frontLeftPage != null
-                        ? Transform(
-                            transform: _controller.frontLeftPageMatrix4,
-                            origin: const Offset(1.0, 0.5),
-                            child: ClipRect(
-                              clipper:
-                                  FrontLeftPageClipper(controller: _controller),
-                              child: BookPage(
-                                paragraph: _controller.frontLeftPage!.paragraph,
-                                imageUrl: _controller.frontLeftPage!.image,
-                              ),
+                        ? ClipRect(
+                            clipper:
+                                FrontLeftPageClipper(controller: _controller),
+                            child: BookPage(
+                              paragraph: _controller.frontLeftPage!.paragraph,
+                              imageUrl: _controller.frontLeftPage!.image,
                             ),
                           )
                         : Container(),
@@ -126,8 +111,30 @@ class _BookLandscapeViewState extends ViewState<BookLandscapeView>
               ),
               Row(
                 children: [
+                  const Spacer(flex: 1),
                   Expanded(
-                    child: _controller.frontLeftPage != null
+                    child: _controller.behindLeftPage != null
+                        ? Transform(
+                            transform: _controller.behindLeftPageMatrix4,
+                            child: ClipRect(
+                              clipper: BehindLeftPageClipper(
+                                  controller: _controller),
+                              child: BookPage(
+                                paragraph:
+                                    _controller.behindLeftPage!.paragraph,
+                                imageUrl: _controller.behindLeftPage!.image,
+                              ),
+                            ),
+                          )
+                        : Container(),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: _controller.behindLeftPage != null
                         ? GestureDetector(
                             onHorizontalDragUpdate:
                                 _controller.onLeftPageDragUpdate,
@@ -140,7 +147,8 @@ class _BookLandscapeViewState extends ViewState<BookLandscapeView>
                   ),
                   const Spacer(flex: 1),
                   Expanded(
-                    child: _controller.frontRightPage != null
+                    flex: 2,
+                    child: _controller.behindRightPage != null
                         ? GestureDetector(
                             onHorizontalDragUpdate:
                                 _controller.onRightPageDragUpdate,
@@ -171,10 +179,9 @@ class BehindLeftPageClipper extends CustomClipper<Rect> {
   @override
   Rect getClip(Size size) {
     return Rect.fromLTWH(
+      size.width * controller.leftPageWidthRatio,
       0.0,
-      0.0,
-      size.width * controller.rightPageWidthRatio +
-          controller.frontRightPageMatrix4.row0[3],
+      size.width,
       size.height,
     );
   }
@@ -193,7 +200,7 @@ class BehindRightPageClipper extends CustomClipper<Rect> {
   @override
   Rect getClip(Size size) {
     return Rect.fromLTWH(
-      0.0,
+      size.width * (1 - controller.leftPageWidthRatio),
       0.0,
       size.width,
       size.height,
@@ -214,7 +221,7 @@ class FrontLeftPageClipper extends CustomClipper<Rect> {
   @override
   Rect getClip(Size size) {
     return Rect.fromLTWH(
-      0.0,
+      size.width * (1 - controller.leftPageWidthRatio),
       0.0,
       size.width * controller.rightPageWidthRatio,
       size.height,

@@ -9,12 +9,11 @@ class BookController extends BaseController {
 
   BookModel? _book;
 
-  late Offset _dragOffset;
-
-  late Matrix4 frontLeftPageMatrix4;
   late Matrix4 frontRightPageMatrix4;
   late Matrix4 behindLeftPageMatrix4;
-  late Matrix4 behindRightPageMatrix4;
+
+  late Offset _dragRightPageOffset;
+  late Offset _dragLeftPageOffset;
 
   late double leftPageWidthRatio;
   late double rightPageWidthRatio;
@@ -30,12 +29,11 @@ class BookController extends BaseController {
   void _initialize({required int page}) {
     _page = page;
 
-    _dragOffset = Offset.zero;
+    _dragRightPageOffset = Offset.zero;
+    _dragLeftPageOffset = Offset.zero;
 
-    frontLeftPageMatrix4 = Matrix4.identity();
     frontRightPageMatrix4 = Matrix4.identity();
     behindLeftPageMatrix4 = Matrix4.identity();
-    behindRightPageMatrix4 = Matrix4.identity();
 
     leftPageWidthRatio = 1;
     rightPageWidthRatio = 1;
@@ -49,8 +47,12 @@ class BookController extends BaseController {
 
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        if (_dragOffset.dx < 0) {
+        if (_dragRightPageOffset.dx < 0.0) {
           _initialize(page: _page + 2);
+          notify();
+        }
+        if (_dragLeftPageOffset.dx > 0.0) {
+          _initialize(page: _page - 2);
           notify();
         }
       }
@@ -117,35 +119,85 @@ class BookController extends BaseController {
     return _book!;
   }
 
-  void onLeftPageDragStart(DragStartDetails details) {}
-
   void onLeftPageDragUpdate(DragUpdateDetails details) {
     _animationController.stop();
 
-    _dragOffset += details.delta;
+    _dragLeftPageOffset += details.delta;
+
+    _updateLeftPageMatrix4();
   }
 
   void onLeftPageDragEnd(DragEndDetails details) {
-    _dragOffset = Offset.zero;
+    if (1 - _dragLeftPageOffset.dx.abs() / _viewportSize.width < 0.7) {
+      _turnLeftPage();
+    } else {
+      _leaveLeftPage();
+    }
   }
 
-  void onRightPageDragStart(DragStartDetails details) {}
+  void _turnLeftPage() {
+    final curvedController = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.ease,
+    );
+
+    final tweenAnimation = Tween<Offset>(
+      begin: _dragLeftPageOffset,
+      end: Offset(_viewportSize.width, 0.0),
+    ).animate(curvedController);
+
+    tweenAnimationListener() {
+      _dragLeftPageOffset = tweenAnimation.value;
+      _updateLeftPageMatrix4();
+    }
+
+    _addListenerOnAnimation(
+      animation: tweenAnimation,
+      listener: tweenAnimationListener,
+    );
+
+    _animationController.forward(from: 0.0);
+  }
+
+  void _leaveLeftPage() {
+    final curvedController = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.ease,
+    );
+
+    final tweenAnimation = Tween<Offset>(
+      begin: _dragLeftPageOffset,
+      end: Offset.zero,
+    ).animate(curvedController);
+
+    tweenAnimationListener() {
+      _dragLeftPageOffset = tweenAnimation.value;
+      _updateLeftPageMatrix4();
+    }
+
+    _addListenerOnAnimation(
+      animation: tweenAnimation,
+      listener: tweenAnimationListener,
+    );
+
+    _animationController.forward(from: 0.0);
+  }
 
   void onRightPageDragUpdate(DragUpdateDetails details) {
     _animationController.stop();
 
-    _dragOffset += details.delta;
+    _dragRightPageOffset += details.delta;
 
-    if (_dragOffset.dx > 0) {
-      _dragOffset = Offset.zero;
+    if (_dragRightPageOffset.dx > 0) {
+      _dragRightPageOffset = Offset.zero;
       return;
     }
 
-    _updateFrontRightPageMatrix4();
+    _updateRightPageMatrix4();
   }
 
   void onRightPageDragEnd(DragEndDetails details) {
-    if (1 - _dragOffset.dx.abs() / _viewportSize.width < 0.7) {
+    if (1 - _dragRightPageOffset.dx.abs() / _viewportSize.width < 0.7) {
       _turnRightPage();
     } else {
       _leaveRightPage();
@@ -159,14 +211,19 @@ class BookController extends BaseController {
     );
 
     final tweenAnimation = Tween<Offset>(
-      begin: _dragOffset,
+      begin: _dragRightPageOffset,
       end: Offset(-1.0 * _viewportSize.width, 0.0),
     ).animate(curvedController);
 
-    tweenAnimation.addListener(() {
-      _dragOffset = tweenAnimation.value;
-      _updateFrontRightPageMatrix4();
-    });
+    tweenAnimationListener() {
+      _dragRightPageOffset = tweenAnimation.value;
+      _updateRightPageMatrix4();
+    }
+
+    _addListenerOnAnimation(
+      animation: tweenAnimation,
+      listener: tweenAnimationListener,
+    );
 
     _animationController.forward(from: 0.0);
   }
@@ -178,20 +235,64 @@ class BookController extends BaseController {
     );
 
     final tweenAnimation = Tween<Offset>(
-      begin: _dragOffset,
+      begin: _dragRightPageOffset,
       end: Offset.zero,
     ).animate(curvedController);
 
-    tweenAnimation.addListener(() {
-      _dragOffset = tweenAnimation.value;
-      _updateFrontRightPageMatrix4();
-    });
+    tweenAnimationListener() {
+      _dragRightPageOffset = tweenAnimation.value;
+      _updateRightPageMatrix4();
+    }
+
+    _addListenerOnAnimation(
+      animation: tweenAnimation,
+      listener: tweenAnimationListener,
+    );
 
     _animationController.forward(from: 0.0);
   }
 
-  void _updateFrontRightPageMatrix4() {
-    final translateY = _dragOffset.dx;
+  void _addListenerOnAnimation({
+    required Animation animation,
+    required void Function() listener,
+  }) {
+    animation.addListener(listener);
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        animation.removeListener(listener);
+      }
+    });
+  }
+
+  void _updateLeftPageMatrix4() {
+    final translateY = _dragLeftPageOffset.dx;
+    behindLeftPageMatrix4 = Matrix4(
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      -1 * _viewportSize.width + translateY,
+      0,
+      0,
+      1,
+    );
+
+    leftPageWidthRatio = 1 - (translateY.abs() / _viewportSize.width);
+
+    notify();
+  }
+
+  void _updateRightPageMatrix4() {
+    final translateY = _dragRightPageOffset.dx;
 
     frontRightPageMatrix4 = Matrix4(
       1,

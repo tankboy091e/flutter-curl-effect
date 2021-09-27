@@ -151,6 +151,14 @@ class BookController extends BaseController {
 
     _dragLeftPageOffset += details.delta;
 
+    if (_dragLeftPageOffset.dx < 0.0) {
+      _dragLeftPageOffset = Offset(0.0, _dragLeftPageOffset.dy);
+    }
+
+    if (_dragLeftPageOffset.dx > _viewportSize.width) {
+      _dragLeftPageOffset = Offset(_viewportSize.width, _dragLeftPageOffset.dy);
+    }
+
     _updateLeftPageMatrix4();
   }
 
@@ -176,7 +184,7 @@ class BookController extends BaseController {
 
     final tweenAnimation = Tween<Offset>(
       begin: _dragLeftPageOffset,
-      end: Offset(_viewportSize.width, 0.0),
+      end: Offset(_viewportSize.width, _dragLeftPageOffset.dy),
     ).animate(curvedController);
 
     tweenAnimationListener() {
@@ -200,7 +208,7 @@ class BookController extends BaseController {
 
     final tweenAnimation = Tween<Offset>(
       begin: _dragLeftPageOffset,
-      end: Offset.zero,
+      end: Offset(0.0, _dragLeftPageOffset.dy),
     ).animate(curvedController);
 
     tweenAnimationListener() {
@@ -225,9 +233,13 @@ class BookController extends BaseController {
 
     _dragRightPageOffset += details.delta;
 
-    if (_dragRightPageOffset.dx > 0) {
-      _dragRightPageOffset = Offset.zero;
-      return;
+    if (_dragRightPageOffset.dx > 0.0) {
+      _dragRightPageOffset = Offset(0.0, _dragRightPageOffset.dy);
+    }
+
+    if (_dragRightPageOffset.dx < -1 * _viewportSize.width) {
+      _dragRightPageOffset =
+          Offset(-1 * _viewportSize.width, _dragRightPageOffset.dy);
     }
 
     _updateRightPageMatrix4();
@@ -255,7 +267,7 @@ class BookController extends BaseController {
 
     final tweenAnimation = Tween<Offset>(
       begin: _dragRightPageOffset,
-      end: Offset(-1.0 * _viewportSize.width, 0.0),
+      end: Offset(-1.0 * _viewportSize.width, _dragRightPageOffset.dy),
     ).animate(curvedController);
 
     tweenAnimationListener() {
@@ -279,7 +291,7 @@ class BookController extends BaseController {
 
     final tweenAnimation = Tween<Offset>(
       begin: _dragRightPageOffset,
-      end: Offset.zero,
+      end: Offset(0.0, _dragRightPageOffset.dy),
     ).animate(curvedController);
 
     tweenAnimationListener() {

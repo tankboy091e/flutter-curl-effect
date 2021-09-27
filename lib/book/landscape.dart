@@ -73,23 +73,6 @@ class _BookLandscapeViewState extends ViewState<BookLandscapeView>
                           )
                         : Container(),
                   ),
-                  const Spacer(flex: 1)
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: _controller.frontLeftPage != null
-                        ? ClipRect(
-                            clipper:
-                                FrontLeftPageClipper(controller: _controller),
-                            child: BookPage(
-                              paragraph: _controller.frontLeftPage!.paragraph,
-                              imageUrl: _controller.frontLeftPage!.image,
-                            ),
-                          )
-                        : Container(),
-                  ),
                   Expanded(
                     child: _controller.frontRightPage != null
                         ? Transform(
@@ -111,7 +94,18 @@ class _BookLandscapeViewState extends ViewState<BookLandscapeView>
               ),
               Row(
                 children: [
-                  const Spacer(flex: 1),
+                  Expanded(
+                    child: _controller.frontLeftPage != null
+                        ? ClipRect(
+                            clipper:
+                                FrontLeftPageClipper(controller: _controller),
+                            child: BookPage(
+                              paragraph: _controller.frontLeftPage!.paragraph,
+                              imageUrl: _controller.frontLeftPage!.image,
+                            ),
+                          )
+                        : Container(),
+                  ),
                   Expanded(
                     child: _controller.behindLeftPage != null
                         ? Transform(

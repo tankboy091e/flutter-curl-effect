@@ -1,4 +1,6 @@
-import 'package:book_sample/book/page.dart';
+import 'dart:math';
+
+import 'package:book_sample/book/page/index.dart';
 import 'package:book_sample/controller/book.dart';
 import 'package:book_sample/interfaces/view.dart';
 import 'package:flutter/material.dart';
@@ -41,19 +43,60 @@ class _BookLandscapeViewState extends ViewState<BookLandscapeView>
                 children: [
                   Expanded(
                     child: _controller.backgroundLeftPage != null
-                        ? BookPage(
-                            paragraph:
-                                _controller.backgroundLeftPage!.paragraph,
-                            imageUrl: _controller.backgroundLeftPage!.image,
+                        ? Stack(
+                            children: [
+                              BookPage(
+                                paragraph:
+                                    _controller.backgroundLeftPage!.paragraph,
+                                imageUrl: _controller.backgroundLeftPage!.image,
+                              ),
+                              Transform(
+                                transform:
+                                    _controller.prevFloatingShadowMatrix4,
+                                alignment: const Alignment(-1.0, 0.5),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin:
+                                          _controller.prevFloatingShadowBegin,
+                                      end: _controller.prevFloatingShadowEnd,
+                                      colors: [
+                                        Colors.black.withOpacity(0.0),
+                                        Colors.black.withOpacity(_controller
+                                            .prevfloatingShadowOpacity),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           )
                         : Container(),
                   ),
                   Expanded(
                     child: _controller.backgroundRightPage != null
-                        ? BookPage(
-                            paragraph:
-                                _controller.backgroundRightPage!.paragraph,
-                            imageUrl: _controller.backgroundRightPage!.image,
+                        ? Stack(
+                            children: [
+                              BookPage(
+                                paragraph:
+                                    _controller.backgroundRightPage!.paragraph,
+                                imageUrl:
+                                    _controller.backgroundRightPage!.image,
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: const Alignment(-0.7, 0.5),
+                                    end: const Alignment(-1.0, 0.5),
+                                    colors: [
+                                      Colors.black.withOpacity(0.0),
+                                      Colors.black.withOpacity(
+                                          _controller.primaryShadowOpacity),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
                           )
                         : Container(),
                   )
@@ -66,9 +109,27 @@ class _BookLandscapeViewState extends ViewState<BookLandscapeView>
                         ? ClipRect(
                             clipper:
                                 BehindRightPageClipper(controller: _controller),
-                            child: BookPage(
-                              paragraph: _controller.behindRightPage!.paragraph,
-                              imageUrl: _controller.behindRightPage!.image,
+                            child: Stack(
+                              children: [
+                                BookPage(
+                                  paragraph:
+                                      _controller.behindRightPage!.paragraph,
+                                  imageUrl: _controller.behindRightPage!.image,
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: const Alignment(0.7, 0.5),
+                                      end: const Alignment(1.0, 0.5),
+                                      colors: [
+                                        Colors.black.withOpacity(0.0),
+                                        Colors.black.withOpacity(
+                                            _controller.deepShadowOpacity),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           )
                         : Container(),
@@ -77,15 +138,36 @@ class _BookLandscapeViewState extends ViewState<BookLandscapeView>
                     child: _controller.frontRightPage != null
                         ? Transform(
                             transform: _controller.frontRightPageMatrix4,
-                            origin: const Offset(0.0, 0.5),
-                            child: ClipRect(
-                              clipper: FrontRightPageClipper(
-                                  controller: _controller),
-                              child: BookPage(
-                                paragraph:
-                                    _controller.frontRightPage!.paragraph,
-                                imageUrl: _controller.frontRightPage!.image,
-                              ),
+                            child: Stack(
+                              children: [
+                                ClipRect(
+                                  clipper: FrontRightPageClipper(
+                                      controller: _controller),
+                                  child: BookPage(
+                                    paragraph:
+                                        _controller.frontRightPage!.paragraph,
+                                    imageUrl: _controller.frontRightPage!.image,
+                                  ),
+                                ),
+                                Transform(
+                                  transform:
+                                      _controller.frontRightPageShadowMatrix4,
+                                  alignment: Alignment.centerRight,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: const Alignment(-0.7, 0.5),
+                                        end: const Alignment(-1.0, 0.5),
+                                        colors: [
+                                          Colors.black.withOpacity(0.0),
+                                          Colors.black.withOpacity(
+                                              _controller.primaryShadowOpacity),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
                             ),
                           )
                         : Container(),
@@ -96,13 +178,36 @@ class _BookLandscapeViewState extends ViewState<BookLandscapeView>
                 children: [
                   Expanded(
                     child: _controller.frontLeftPage != null
-                        ? ClipRect(
-                            clipper:
-                                FrontLeftPageClipper(controller: _controller),
-                            child: BookPage(
-                              paragraph: _controller.frontLeftPage!.paragraph,
-                              imageUrl: _controller.frontLeftPage!.image,
-                            ),
+                        ? Stack(
+                            children: [
+                              ClipRect(
+                                clipper: FrontLeftPageClipper(
+                                    controller: _controller),
+                                child: BookPage(
+                                  paragraph:
+                                      _controller.frontLeftPage!.paragraph,
+                                  imageUrl: _controller.frontLeftPage!.image,
+                                ),
+                              ),
+                              Transform(
+                                transform:
+                                    _controller.frontLeftPageShadowMatrix4,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin:
+                                          _controller.frontLeftPageShadowBegin,
+                                      end: _controller.frontLeftPageShadowEnd,
+                                      colors: [
+                                        Colors.black.withOpacity(0.0),
+                                        Colors.black.withOpacity(
+                                            _controller.deepShadowOpacity),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           )
                         : Container(),
                   ),
@@ -110,19 +215,58 @@ class _BookLandscapeViewState extends ViewState<BookLandscapeView>
                     child: _controller.behindLeftPage != null
                         ? Transform(
                             transform: _controller.behindLeftPageMatrix4,
-                            child: ClipRect(
-                              clipper: BehindLeftPageClipper(
-                                  controller: _controller),
-                              child: BookPage(
-                                paragraph:
-                                    _controller.behindLeftPage!.paragraph,
-                                imageUrl: _controller.behindLeftPage!.image,
-                              ),
+                            child: Stack(
+                              children: [
+                                ClipRect(
+                                  clipper: BehindLeftPageClipper(
+                                      controller: _controller),
+                                  child: BookPage(
+                                    paragraph:
+                                        _controller.behindLeftPage!.paragraph,
+                                    imageUrl: _controller.behindLeftPage!.image,
+                                  ),
+                                ),
+                                Transform(
+                                  transform:
+                                      _controller.behindLeftPageShadowMatrix4,
+                                  alignment: Alignment.centerRight,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: const Alignment(-0.7, 0.5),
+                                        end: const Alignment(-1.0, 0.5),
+                                        colors: [
+                                          Colors.black.withOpacity(0.0),
+                                          Colors.black.withOpacity(
+                                              _controller.primaryShadowOpacity),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           )
                         : Container(),
                   ),
                 ],
+              ),
+              Transform(
+                transform: _controller.nextFloatingShadowMatrix4,
+                alignment: const Alignment(1.0, 0.5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: _controller.nextFloatingShadowBeign,
+                      end: _controller.nextfloatingShadowEnd,
+                      colors: [
+                        Colors.black
+                            .withOpacity(_controller.nextfloatingShadowOpacity),
+                        Colors.black.withOpacity(0.0),
+                      ],
+                    ),
+                  ),
+                ),
               ),
               Row(
                 children: [

@@ -12,7 +12,7 @@ class BookLandscapeView extends StatefulWidget {
 }
 
 class _BookLandscapeViewState extends ViewState<BookLandscapeView>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final BookController _controller = BookController();
 
   @override

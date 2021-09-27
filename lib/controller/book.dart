@@ -20,10 +20,17 @@ class BookController extends BaseController {
 
   late Size _viewportSize;
 
-  late final AnimationController _animationController;
+  late final AnimationController _rightPageAnimationController;
+  late final AnimationController _leftPageAnimationController;
+
+  late bool _isLeftPageTurning;
+  late bool _isRightPageTurning;
 
   BookController() {
     _initialize(page: 0);
+
+    _isLeftPageTurning = false;
+    _isRightPageTurning = false;
   }
 
   void _initialize({required int page}) {
@@ -40,21 +47,37 @@ class BookController extends BaseController {
   }
 
   void attachTickerProvider(TickerProvider tickerProvider) {
-    _animationController = AnimationController(
+    _rightPageAnimationController = AnimationController(
       vsync: tickerProvider,
       duration: const Duration(milliseconds: 500),
     );
 
-    _animationController.addStatusListener((status) {
+    _rightPageAnimationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         if (_dragRightPageOffset.dx < 0.0) {
           _initialize(page: _page + 2);
+
           notify();
         }
+
+        _isRightPageTurning = false;
+      }
+    });
+
+    _leftPageAnimationController = AnimationController(
+      vsync: tickerProvider,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _leftPageAnimationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
         if (_dragLeftPageOffset.dx > 0.0) {
           _initialize(page: _page - 2);
+
           notify();
         }
+
+        _isLeftPageTurning = false;
       }
     });
   }
@@ -120,7 +143,11 @@ class BookController extends BaseController {
   }
 
   void onLeftPageDragUpdate(DragUpdateDetails details) {
-    _animationController.stop();
+    if (_isRightPageTurning) {
+      return;
+    }
+
+    _leftPageAnimationController.stop();
 
     _dragLeftPageOffset += details.delta;
 
@@ -128,6 +155,12 @@ class BookController extends BaseController {
   }
 
   void onLeftPageDragEnd(DragEndDetails details) {
+    if (_isRightPageTurning) {
+      return;
+    }
+
+    _isLeftPageTurning = true;
+
     if (1 - _dragLeftPageOffset.dx.abs() / _viewportSize.width < 0.7) {
       _turnLeftPage();
     } else {
@@ -137,7 +170,7 @@ class BookController extends BaseController {
 
   void _turnLeftPage() {
     final curvedController = CurvedAnimation(
-      parent: _animationController,
+      parent: _leftPageAnimationController,
       curve: Curves.ease,
     );
 
@@ -156,12 +189,12 @@ class BookController extends BaseController {
       listener: tweenAnimationListener,
     );
 
-    _animationController.forward(from: 0.0);
+    _leftPageAnimationController.forward(from: 0.0);
   }
 
   void _leaveLeftPage() {
     final curvedController = CurvedAnimation(
-      parent: _animationController,
+      parent: _leftPageAnimationController,
       curve: Curves.ease,
     );
 
@@ -180,11 +213,15 @@ class BookController extends BaseController {
       listener: tweenAnimationListener,
     );
 
-    _animationController.forward(from: 0.0);
+    _leftPageAnimationController.forward(from: 0.0);
   }
 
   void onRightPageDragUpdate(DragUpdateDetails details) {
-    _animationController.stop();
+    if (_isLeftPageTurning) {
+      return;
+    }
+
+    _rightPageAnimationController.stop();
 
     _dragRightPageOffset += details.delta;
 
@@ -197,6 +234,12 @@ class BookController extends BaseController {
   }
 
   void onRightPageDragEnd(DragEndDetails details) {
+    if (_isLeftPageTurning) {
+      return;
+    }
+
+    _isRightPageTurning = true;
+
     if (1 - _dragRightPageOffset.dx.abs() / _viewportSize.width < 0.7) {
       _turnRightPage();
     } else {
@@ -206,7 +249,7 @@ class BookController extends BaseController {
 
   void _turnRightPage() {
     final curvedController = CurvedAnimation(
-      parent: _animationController,
+      parent: _rightPageAnimationController,
       curve: Curves.ease,
     );
 
@@ -225,12 +268,12 @@ class BookController extends BaseController {
       listener: tweenAnimationListener,
     );
 
-    _animationController.forward(from: 0.0);
+    _rightPageAnimationController.forward(from: 0.0);
   }
 
   void _leaveRightPage() {
     final curvedController = CurvedAnimation(
-      parent: _animationController,
+      parent: _rightPageAnimationController,
       curve: Curves.ease,
     );
 
@@ -249,7 +292,7 @@ class BookController extends BaseController {
       listener: tweenAnimationListener,
     );
 
-    _animationController.forward(from: 0.0);
+    _rightPageAnimationController.forward(from: 0.0);
   }
 
   void _addListenerOnAnimation({

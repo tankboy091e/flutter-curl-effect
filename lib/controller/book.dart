@@ -27,24 +27,30 @@ class BookController extends BaseController {
   late double rightPageWidthRatio;
 
   Alignment get frontLeftPageShadowBegin =>
-      Alignment(-1 + 1.7 * pow(rightPageWidthRatio, 0.5), 0.5);
+      Alignment(-1 + 1.8 * pow(rightPageWidthRatio, 0.5), 0.5);
+
   Alignment get frontLeftPageShadowEnd => const Alignment(1.0, 0.5);
 
   Alignment get nextFloatingShadowBeign => const Alignment(-1.0, 0.5);
+
   Alignment get nextfloatingShadowEnd =>
-      Alignment(2.0 * pow(1 - nextFloatingShadowMatrix4[0], 2) - 1.0, 0.5);
+      Alignment(2.0 * pow(1 - nextFloatingShadowMatrix4[0], 3) - 1.0, 0.5);
 
   Alignment get prevFloatingShadowBegin =>
-      Alignment(-1.0 + 1.7 * pow(1 - leftPageWidthRatio, 0.5), 0.5);
+      Alignment(-1.0 + 1.8 * pow(1 - leftPageWidthRatio, 0.5), 0.5);
+
   Alignment get prevFloatingShadowEnd => const Alignment(1.0, 0.5);
 
-  double get primaryShadowOpacity => 0.1;
-  double get deepShadowOpacity => 0.15;
+  double get primaryShadowOpacity => 0.2;
+
+  double get deepShadowOpacity => 0.35;
+
   double get nextfloatingShadowOpacity =>
       deepShadowOpacity *
       4.0 *
       (1 - nextFloatingShadowMatrix4[0]) *
       (nextFloatingShadowMatrix4[0]);
+
   double get prevfloatingShadowOpacity =>
       deepShadowOpacity * (-1 * prevFloatingShadowMatrix4[0] + 1);
 

@@ -1,9 +1,9 @@
 class PageModel {
   String paragraph;
-  String image;
+  String? image;
 
   PageModel({
     required this.paragraph,
-    required this.image,
+    this.image,
   });
 }

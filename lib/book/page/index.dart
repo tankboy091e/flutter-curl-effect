@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class BookPage extends StatelessWidget {
   final String paragraph;
-  final String imageUrl;
+  final String? imageUrl;
 
   const BookPage({
     Key? key,
@@ -21,6 +21,14 @@ class BookPage extends StatelessWidget {
   }
 
   Widget get paper {
+    if (imageUrl != null) {
+      return Image(
+        height: double.infinity,
+        image: NetworkImage(imageUrl!),
+        fit: BoxFit.cover,
+      );
+    }
+
     return Container(
       height: double.infinity,
       color: Colors.white,
@@ -33,8 +41,8 @@ class BookPage extends StatelessWidget {
       child: Center(
         child: Text(
           paragraph,
-          style: const TextStyle(
-            color: Colors.black,
+          style: TextStyle(
+            color: imageUrl != null ? Colors.white : Colors.black,
             fontSize: 20.0,
           ),
         ),

@@ -12,19 +12,15 @@ class BookRepository {
       pages: [
         PageModel(
           paragraph: '극유산호. 요 다섯 자 동안에 나는 두 자 이상의 오자를 범했는가 싶다.',
-          image: 'https://picsum.photos/seed/1/500/500',
         ),
         PageModel(
           paragraph: '이것은 나 스스로 하늘을 우러러 부끄러워 할 일이겠으나',
-          image: 'https://picsum.photos/seed/2/500/500',
         ),
         PageModel(
           paragraph: '인지가 발달해 가는 면목이 실로 약여하다.',
-          image: 'https://picsum.photos/seed/3/500/500',
         ),
         PageModel(
           paragraph: '죽는 한이 있더라도 이 산호 채찍일랑 꽉 쥐고 죽으리라.',
-          image: 'https://picsum.photos/seed/4/500/500',
         ),
         PageModel(
           paragraph: '내 폐포파립 우에 퇴색한 망해 우에 봉황이 와 앉으리라.',

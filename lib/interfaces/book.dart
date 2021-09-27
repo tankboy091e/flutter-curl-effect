@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:book_sample/controller/base.dart';
 import 'package:book_sample/model/book.dart';
 import 'package:book_sample/model/page.dart';
@@ -14,45 +12,11 @@ class BookController extends BaseController {
   late Matrix4 frontRightPageMatrix4;
   late Matrix4 behindLeftPageMatrix4;
 
-  late Matrix4 frontRightPageShadowMatrix4;
-  late Matrix4 frontLeftPageShadowMatrix4;
-  late Matrix4 behindLeftPageShadowMatrix4;
-  late Matrix4 nextFloatingShadowMatrix4;
-  late Matrix4 prevFloatingShadowMatrix4;
-
   late Offset _dragRightPageOffset;
   late Offset _dragLeftPageOffset;
 
   late double leftPageWidthRatio;
   late double rightPageWidthRatio;
-
-  Alignment get frontLeftPageShadowBegin =>
-      Alignment(-1 + 1.8 * pow(rightPageWidthRatio, 0.5), 0.5);
-
-  Alignment get frontLeftPageShadowEnd => const Alignment(1.0, 0.5);
-
-  Alignment get nextFloatingShadowBeign => const Alignment(-1.0, 0.5);
-
-  Alignment get nextfloatingShadowEnd =>
-      Alignment(2.0 * pow(1 - nextFloatingShadowMatrix4[0], 3) - 1.0, 0.5);
-
-  Alignment get prevFloatingShadowBegin =>
-      Alignment(-1.0 + 1.8 * pow(1 - leftPageWidthRatio, 0.5), 0.5);
-
-  Alignment get prevFloatingShadowEnd => const Alignment(1.0, 0.5);
-
-  double get primaryShadowOpacity => 0.2;
-
-  double get deepShadowOpacity => 0.35;
-
-  double get nextfloatingShadowOpacity =>
-      deepShadowOpacity *
-      4.0 *
-      (1 - nextFloatingShadowMatrix4[0]) *
-      (nextFloatingShadowMatrix4[0]);
-
-  double get prevfloatingShadowOpacity =>
-      deepShadowOpacity * (-1 * prevFloatingShadowMatrix4[0] + 1);
 
   late Size _viewportSize;
 
@@ -77,66 +41,6 @@ class BookController extends BaseController {
 
     frontRightPageMatrix4 = Matrix4.identity();
     behindLeftPageMatrix4 = Matrix4.identity();
-
-    frontRightPageShadowMatrix4 = Matrix4.identity();
-    frontLeftPageShadowMatrix4 = Matrix4.identity();
-
-    behindLeftPageShadowMatrix4 = Matrix4(
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    );
-
-    nextFloatingShadowMatrix4 = Matrix4(
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    );
-
-    prevFloatingShadowMatrix4 = Matrix4(
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    );
 
     leftPageWidthRatio = 1;
     rightPageWidthRatio = 1;
@@ -439,63 +343,6 @@ class BookController extends BaseController {
 
     leftPageWidthRatio = 1 - (translateY.abs() / _viewportSize.width);
 
-    behindLeftPageShadowMatrix4 = Matrix4(
-      1 - leftPageWidthRatio,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    );
-
-    nextFloatingShadowMatrix4 = Matrix4(
-      leftPageWidthRatio,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    );
-
-    prevFloatingShadowMatrix4 = Matrix4(
-      1 - leftPageWidthRatio,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    );
-
     notify();
   }
 
@@ -522,63 +369,6 @@ class BookController extends BaseController {
     );
 
     rightPageWidthRatio = 1 - (translateY.abs() / _viewportSize.width);
-
-    frontRightPageShadowMatrix4 = Matrix4(
-      rightPageWidthRatio,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    );
-
-    frontLeftPageShadowMatrix4 = Matrix4(
-      rightPageWidthRatio,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    );
-
-    nextFloatingShadowMatrix4 = Matrix4(
-      (1 - rightPageWidthRatio).clamp(0.0, 1.0),
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-    );
 
     notify();
   }

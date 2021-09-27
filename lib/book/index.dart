@@ -10,7 +10,7 @@ class BookView extends StatelessWidget {
       body: OrientationBuilder(
         builder: (context, orientation) {
           if (orientation == Orientation.landscape) {
-            return BookLandscapeView();
+            return const BookLandscapeView();
           }
 
           return const BookPortraitView();
